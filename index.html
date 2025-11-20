@@ -6,6 +6,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Mini Bank – Family Wallet Demo</title>
   <style>
+/* ===========================
+   MiniBank V11 – Theme Palette
+   =========================== */
+
+:root {
+  --bg: #0f172a;
+  --bg-panel: #1e293b;
+  --bg-card: #0b1220;
+  --ink: #e2e8f0;
+  --ink-muted: #94a3b8;
+  --primary: #38bdf8;
+  --primary-soft: rgba(56,189,248,.25);
+  --line: rgba(148,163,184,.35);
+  --shadow-strong: rgba(0,0,0,.45);
+  --shadow-soft: rgba(0,0,0,.25);
+}
+
+:root[data-theme="light"] {
+  --bg: #f8fafc;
+  --bg-panel: #ffffff;
+  --bg-card: #f1f5f9;
+  --ink: #0f172a;
+  --ink-muted: #475569;
+  --primary: #0284c7;
+  --primary-soft: rgba(2,132,199,.16);
+  --line: rgba(15,23,42,.12);
+  --shadow-strong: rgba(0,0,0,.15);
+  --shadow-soft: rgba(0,0,0,.08);
+}
+
+
     :root{
       --bg:#020617;
       --panel:#02081e;
@@ -208,6 +239,240 @@
       box-shadow:0 22px 55px rgba(15,23,42,.95);
     }
 
+    
+
+/* ================================================
+   MiniBank V11 – HERO Wallet Card (Dark + Light)
+   ================================================ */
+
+.card-soft:has(#balance) {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 20px 22px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  box-shadow: 0 25px 50px var(--shadow-strong);
+}
+
+/* Background Glow */
+.card-soft:has(#balance)::before {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  background:
+    radial-gradient(circle at 0% 0%, var(--primary-soft), transparent 58%),
+    radial-gradient(circle at 90% 10%, rgba(129,140,248,.22), transparent 58%);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+/* كل عناصر الكرت فوق الخلفية */
+.card-soft:has(#balance) > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* عنوان الكرت */
+.card-soft:has(#balance) h3,
+.card-soft:has(#balance) .muted-title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* إعدادات العملة */
+.card-soft:has(#balance) #currencySelector {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  outline: none;
+}
+
+/* صف العنوان */
+.card-soft:has(#balance) .header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+/* رقم الرصيد */
+.card-soft:has(#balance) #balance {
+  margin-top: 4px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  background: linear-gradient(120deg, var(--ink), var(--primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Label فوق الرصيد */
+.card-soft:has(#balance) #balance::before {
+  content: "Available Balance";
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+/* on hold */
+.card-soft:has(#balance) #hold {
+  margin-top: 8px !important;
+  font-size: 13px !important;
+  color: var(--ink-muted);
+}
+
+/* صف الأزرار */
+.card-soft:has(#balance) #hold + .btn-row {
+  margin-top: 18px !important;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-soft:has(#balance) #hold + .btn-row button {
+  flex: 1 1 140px;
+  justify-content: center;
+}
+
+/* موبايل */
+@media (max-width: 640px) {
+  .card-soft:has(#balance) {
+    padding: 16px 16px 20px;
+  }
+  .card-soft:has(#balance) #balance {
+    font-size: 26px;
+  }
+  .card-soft:has(#balance) #hold + .btn-row button {
+    flex: 1 1 calc(50% - 6px);
+  }
+}
+
+/* ============================================
+   MiniBank V11 – IBAN Card (Premium)
+   ============================================ */
+
+.iban-card{
+  position:relative;
+  overflow:hidden;
+  padding:20px;
+  border-radius:20px;
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  box-shadow:0 22px 40px var(--shadow-soft);
+}
+
+/* Glow الخلفية */
+.iban-card::before{
+  content:"";
+  position:absolute;
+  inset:-40%;
+  background:
+    radial-gradient(circle at 0% 0%, var(--primary-soft), transparent 55%),
+    radial-gradient(circle at 100% 20%, rgba(129,140,248,.22), transparent 60%);
+  opacity:.9;
+  pointer-events:none;
+}
+.iban-card > *{
+  position:relative;
+  z-index:2;
+}
+
+/* عنوان + Copy */
+.iban-header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.iban-header-row h3{
+  margin:0;
+  font-size:13px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+}
+.btn-iban-copy{
+  padding:4px 10px;
+  font-size:11px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.06);
+  color:var(--ink);
+  cursor:pointer;
+  transition:.2s;
+}
+.btn-iban-copy:hover{
+  background:var(--primary-soft);
+}
+
+/* رقم الـ IBAN */
+.iban-number{
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:.08em;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px dashed var(--line);
+  margin-bottom:10px;
+  color:var(--ink);
+  background:rgba(255,255,255,.03);
+}
+
+/* كود البنك */
+.iban-bank-code{
+  font-size:13px;
+  font-weight:600;
+  margin-bottom:12px;
+  color:var(--primary);
+}
+
+/* الميتاداتا */
+.iban-meta{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.iban-meta .tag{
+  padding:4px 10px;
+  border-radius:10px;
+  font-size:11px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--ink-muted);
+}
+
+/* QR code box */
+.iban-qr-box{
+  margin-top:6px;
+  padding:12px;
+  background:rgba(255,255,255,.04);
+  border-radius:12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--line);
+}
+.iban-qr-box canvas{
+  width:140px;
+  height:140px;
+}
+
+
     h1,h2,h3{
       margin:0 0 8px;
       font-weight:600;
@@ -380,6 +645,138 @@
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:12px;
     }
+/* ===== MiniBank – Wallet KPIs (refined) ===== */
+.kpi-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px;
+  margin:14px 2px 4px;
+}
+
+.kpi-card{
+  position:relative;
+  padding:10px 14px 12px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:radial-gradient(circle at 0% 0%,
+    var(--primary-soft),
+    transparent 55%
+  ),
+  linear-gradient(135deg,
+    rgba(15,23,42,.96),
+    rgba(15,23,42,.90)
+  );
+  box-shadow:0 10px 22px var(--shadow-soft);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+:root[data-theme="light"] .kpi-card{
+  background:radial-gradient(circle at 0% 0%,
+    var(--primary-soft),
+    transparent 55%
+  ),
+  linear-gradient(135deg,
+    #f9fafb,
+    #e5f3fb
+  );
+}
+
+/* نخفّف الـ glow */
+.kpi-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,
+    rgba(148,163,184,.18),
+    transparent 40%,
+    rgba(148,163,184,.12) 70%,
+    transparent 100%
+  );
+  opacity:.5;
+  pointer-events:none;
+}
+
+.kpi-card > *{
+  position:relative;
+  z-index:1;
+}
+
+/* العنوان الصغير */
+.kpi-label{
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+}
+
+/* القيمة الرئيسية */
+.kpi-value{
+  margin-top:4px;
+  font-size:17px;
+  font-weight:600;
+  color:var(--ink);
+}
+
+/* الوصف */
+.kpi-sub{
+  margin-top:3px;
+  font-size:11px;
+  line-height:1.4;
+  color:var(--ink-muted);
+}
+
+/* ألوان النت */
+.kpi-positive{
+  color:#22c55e;
+}
+.kpi-negative{
+  color:#fb923c;
+}
+
+/* إخفاء الصف بالكامل عند عدم وجود بيانات */
+.kpi-row--hidden{
+  display:none;
+}
+
+/* موبايل – كل كرت سطر لوحده */
+@media (max-width:640px){
+  .kpi-row{
+    grid-template-columns:1fr;
+    margin-top:12px;
+  }
+}
+
+/* على الشاشات الواسعة جداً – خليها ٤ كروت في صف واحد */
+@media (min-width: 1200px){
+  .kpi-row{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+    margin-top:14px; /* تقدر تزغرها لو حاب تقلل الفراغ تحت المحفظة */
+  }
+}
+
+
+/* موبايل */
+@media (max-width:640px){
+  .kpi-row{
+    margin-top:14px;
+  }
+  .kpi-card{
+    flex:1 1 100%;
+  }
+}
+
+/* خلي صف الـ KPIs يمتد على العمودين بالكامل داخل grid-2 */
+.grid-2 > #walletKpiRow{
+  grid-column:1 / -1;
+}
+
+
+
     @media(max-width:860px){
       .grid-2,.grid-3{grid-template-columns:minmax(0,1fr);}
     }
@@ -630,6 +1027,110 @@
 
     /* ===== Money AI / Insights styling ===== */
 
+    /* Main layout for insights */
+.insights-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:12px;
+}
+
+/* Cards */
+.insight-card{
+  padding:14px 16px;
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:0 10px 25px var(--shadow-soft);
+}
+
+.insight-card.premium{
+  background:linear-gradient(135deg,
+    rgba(56,189,248,.15),
+    rgba(15,23,42,.95)
+  );
+}
+
+.insight-card.full{
+  grid-column:1/-1;
+}
+
+/* Headings */
+.insight-card .head{
+  font-size:13px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+  margin-bottom:4px;
+}
+
+/* Metric numbers */
+.insight-card .metric{
+  font-size:22px;
+  font-weight:700;
+  margin-top:2px;
+  color:var(--ink);
+}
+
+.insight-card .metric.pos{
+  color:#22c55e;
+}
+.insight-card .metric.neg{
+  color:#fb923c;
+}
+
+/* Score */
+.big-score{
+  font-size:34px;
+  line-height:1;
+  font-weight:800;
+  margin:6px 0;
+  background:linear-gradient(90deg,var(--ink),var(--primary));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+/* Descriptions */
+.desc{
+  font-size:14px;
+  margin-bottom:4px;
+}
+.mini{
+  font-size:11px;
+  color:var(--ink-muted);
+}
+
+/* Categories */
+.category-list{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.cat-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:4px 0;
+}
+.cat-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.cat-left .circle{
+  width:7px;
+  height:7px;
+  background:var(--primary);
+  border-radius:50%;
+}
+.cat-right{
+  color:var(--ink);
+  font-size:13px;
+}
+
+
+
     .insights-header-row{
       display:flex;
       flex-wrap:wrap;
@@ -784,6 +1285,131 @@
   #goalForm{
     grid-template-columns:1fr !important;
   }
+}
+
+/* ===== MiniBank – Money AI Insights layout fix ===== */
+
+/* نخلي كل كروت الـ Insights داخل شبكة واحدة */
+#insightsBody{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:12px;
+  align-items:flex-start;
+}
+
+/* نشيل أي margin عمودي للكروت جوّا Insights */
+#insightsBody .insight-card{
+  margin:0;
+}
+
+/* للبطاقات اللي نحبها فل عرض (جداول، Timeline…) نستخدم grid-column في الـ HTML أو inline style */
+#insightsBody .insight-card.full-width{
+  grid-column:1/-1;
+}
+
+/* موبايل – عمود واحد */
+@media (max-width:768px){
+  #insightsBody{
+    grid-template-columns:1fr;
+  }
+}
+/* ضبط منطقة عنوان Money AI والنص التعريفي */
+#insightsPanel .muted{
+  max-width:900px;
+}
+
+/* مسافة تحت النص التعريفي قبل الأزرار */
+#insightsPanel #insightsModeToggle{
+  margin-top:10px;
+  margin-bottom:14px;
+}
+
+/* ===== MiniBank – Profile Ultra Layout ===== */
+
+.profile-layout{
+  display:grid;
+  grid-template-columns:minmax(0,2.1fr) minmax(0,1.4fr);
+  gap:12px;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+
+@media (max-width:900px){
+  .profile-layout{
+    grid-template-columns:1fr;
+  }
+}
+
+.profile-main .field-grid{
+  margin-top:10px;
+}
+
+/* Header أعلى كرت البروفايل */
+.profile-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.profile-avatar{
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:600;
+  font-size:18px;
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  box-shadow:0 8px 18px var(--shadow-soft);
+}
+
+.profile-name{
+  font-size:16px;
+  font-weight:600;
+}
+
+.profile-tagline{
+  font-size:11px;
+  color:var(--ink-muted);
+}
+
+/* عناوين فرعية داخل الكروت */
+.subhead{
+  margin-top:14px;
+  margin-bottom:4px;
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+}
+
+/* نصوص صغيرة */
+.small{
+  font-size:11px;
+}
+
+/* كرت الـ Security */
+.profile-security .field-grid{
+  margin-top:6px;
+}
+
+/* كرت Danger Zone */
+.profile-danger{
+  border-color:rgba(248,113,113,.7);
+}
+.profile-danger h3{
+  color:#fecaca;
+}
+.profile-danger p{
+  color:#fecaca;
+}
+
+/* Mono style */
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 
@@ -1065,15 +1691,29 @@
       <!-- Dashboard -->
       <section id="tab-dashboard" class="tab-panel fade-tab">
         <div class="grid-2">
-          <section class="card-soft">
-            <h3>IBAN</h3>
-            <div id="iban" class="iban-val">—</div>
-            <div id="bic" class="muted" style="margin-top:4px;font-size:12px;">—</div>
-            <div class="pill-row" style="margin-top:10px">
-              <span class="chip" id="ownerNameChip">Owner: —</span>
-              <span class="chip">Demo – Not connected to real bank</span>
-            </div>
-          </section>
+<section class="card-soft iban-card">
+
+  <div class="iban-header-row">
+    <h3>IBAN</h3>
+    <button id="copyIbanBtn" class="btn-iban-copy">Copy</button>
+  </div>
+
+  <div id="ibanDisplay" class="iban-number">
+    QA84 0000 0000 0000 672f
+  </div>
+
+  <div class="iban-bank-code">QNBAQAQA</div>
+
+  <div class="iban-meta">
+    <span class="tag">Owner: karam ramadan boss</span>
+    <span class="tag">Demo – Not connected to real bank</span>
+  </div>
+
+  <div class="iban-qr-box">
+    <canvas id="ibanQrCanvas"></canvas>
+  </div>
+
+</section>
 
           <section class="card-soft">
             <h3>Wallet</h3>
@@ -1100,8 +1740,34 @@
               <button id="btnPay" class="btn secondary" disabled>Pay (QR/NFC)</button>
             </div>
             <!-- Rush Alerts – premium bar inside Wallet card (JS fills if needed) -->
+            <!-- Rush Alerts – premium bar inside Wallet card (JS fills if needed) -->
             <div id="rushAlertsBar" class="card-soft hidden" style="margin-top:12px;"></div>
           </section>
+
+          <!-- Wallet KPIs – powered by Money AI snapshot -->
+          <section id="walletKpiRow" class="kpi-row kpi-row--hidden">
+            <div class="kpi-card">
+              <div class="kpi-label">In – آخر 30 يوم</div>
+              <div class="kpi-value" id="kpiIn30">0.00 QAR</div>
+              <div class="kpi-sub">إجمالي المداخيل لهذه المحفظة في آخر 30 يومًا.</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Out – آخر 30 يوم</div>
+              <div class="kpi-value" id="kpiOut30">0.00 QAR</div>
+              <div class="kpi-sub">إجمالي الصرف والمدفوعات في آخر 30 يومًا.</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Net 30d</div>
+              <div class="kpi-value" id="kpiNet30">0.00 QAR</div>
+              <div class="kpi-sub">الفرق بين In و Out خلال 30 يوم.</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Runway</div>
+              <div class="kpi-value" id="kpiRunway">—</div>
+              <div class="kpi-sub">كم يوم تقريبًا يمكنك الحفاظ على نفس النسق.</div>
+            </div>
+          </section>
+
         </div>
 
         <section class="card-soft" style="margin-top:14px">
@@ -1355,52 +2021,127 @@
 
 
       <!-- Profile -->
-      <section id="tab-profile" class="tab-panel hidden">
-        <section class="card-soft">
-          <h3>Profile</h3>
-          <form id="profileForm">
-            <div class="field-grid">
-              <div class="field">
-                <label>First name</label>
-                <input id="profFirst">
-              </div>
-              <div class="field">
-                <label>Middle</label>
-                <input id="profMiddle">
-              </div>
-              <div class="field">
-                <label>Family name</label>
-                <input id="profLast">
-              </div>
-              <div class="field">
-                <label>Email</label>
-                <input id="profEmail" type="email">
-              </div>
-              <div class="field">
-                <label>Phone</label>
-                <input id="profPhone" type="tel">
-              </div>
-              <div class="field">
-                <label>PIN (4 digits)</label>
-                <input id="profPin" type="password" maxlength="4">
-              </div>
-            </div>
-            <div class="actions">
-              <button type="submit" class="btn">Save profile</button>
-            </div>
-          </form>
-        </section>
+<section id="tab-profile" class="tab-panel hidden">
 
-        <section class="card-soft" style="margin-top:12px">
-          <h3>Biometric Security</h3>
-          <p class="muted" style="margin-bottom:8px;">إدارة بيانات WebAuthn لهذا الحساب على هذا الجهاز فقط.</p>
-          <div class="btn-row">
-            <button id="btnResetBio" class="btn secondary">Reset / Re-register Biometrics</button>
-            <button id="btnClearBio" class="btn secondary">Clear Biometrics for this device</button>
+  <!-- الصف الرئيسي: معلومات الحساب + الأمن -->
+  <div class="profile-layout">
+
+    <!-- كرت البروفايل الرئيسي -->
+    <section class="card-soft profile-main">
+      <div class="profile-header">
+        <div id="profAvatarCircle" class="profile-avatar">MB</div>
+        <div>
+          <div id="profDisplayName" class="profile-name">—</div>
+          <div id="profDisplayEmail" class="muted small">—</div>
+          <div class="profile-tagline">Owner · Local demo only – not a real bank</div>
+        </div>
+      </div>
+
+      <form id="profileForm">
+        <div class="subhead">Account info</div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label>First name</label>
+            <input id="profFirst">
           </div>
-        </section>
+          <div class="field">
+            <label>Middle</label>
+            <input id="profMiddle">
+          </div>
+          <div class="field">
+            <label>Family name</label>
+            <input id="profLast">
+          </div>
+        </div>
 
-      </section>
+        <div class="subhead">Contact</div>
+        <div class="field-grid">
+          <div class="field">
+            <label>Email</label>
+            <input id="profEmail" type="email">
+          </div>
+          <div class="field">
+            <label>Phone (Qatar)</label>
+            <input id="profPhone" type="tel" placeholder="+9745…">
+          </div>
+        </div>
+
+        <div class="subhead">Security PIN</div>
+        <div class="field-grid">
+          <div class="field">
+            <label>4-digit login PIN</label>
+            <input id="profPin" type="password" maxlength="4">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn">Save profile</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- كرت الأمن والـ Biometrics -->
+    <section class="card-soft profile-security">
+      <h3>Account & Security</h3>
+
+      <div class="field-grid">
+        <div class="field">
+          <label>Account ID</label>
+          <div id="profUserId" class="mono small">—</div>
+        </div>
+        <div class="field">
+          <label>Current device</label>
+          <div class="muted small">This browser · Local demo only</div>
+        </div>
+        <div class="field">
+          <label>2FA status</label>
+          <div class="chip">Coming soon</div>
+        </div>
+      </div>
+
+      <div class="subhead">Biometrics</div>
+      <p class="muted small" style="margin-bottom:8px;">إدارة بيانات WebAuthn لهذا الحساب على هذا الجهاز فقط.</p>
+      <div class="btn-row">
+        <button id="btnResetBio" class="btn secondary">Reset / Re-register Biometrics</button>
+        <button id="btnClearBio" class="btn secondary">Clear Biometrics for this device</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- كرت التفضيلات -->
+  <section class="card-soft profile-preferences">
+    <h3>Preferences</h3>
+    <div class="field-grid">
+      <div class="field">
+        <label>Preferred currency</label>
+        <div id="profPrefCurrency" class="chip mono">QAR</div>
+      </div>
+      <div class="field">
+        <label>Language</label>
+        <div class="chip">English / عربي (auto)</div>
+      </div>
+      <div class="field">
+        <label>Theme</label>
+        <div class="chip">Auto (browser)</div>
+      </div>
+    </div>
+    <p class="muted small" style="margin-top:6px;">
+      هذه الإعدادات للعرض فقط في هذا الديمو. يمكن ربطها لاحقًا بحساب MiniBank أونلاين.
+    </p>
+  </section>
+
+  <!-- كرت Danger Zone -->
+  <section class="card-soft profile-danger" style="margin-top:10px;">
+    <h3>Danger zone</h3>
+    <p class="small">
+      هذا الديمو يعمل بالكامل محليًا على هذا المتصفح فقط. لمسح كل البيانات المحلية وإعادة التجربة من الصفر
+      استخدم زر <strong>♻ Reset</strong> الموجود في الشريط العلوي بجانب أزرار Backup / Restore.
+    </p>
+  </section>
+
+</section>
 
       <div class="msg-bar" id="msg"></div>
     </section>
@@ -1621,5 +2362,133 @@
     </div>
   </section>
 
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+<script>
+(function () {
+  const copyBtn   = document.getElementById('copyIbanBtn');
+  const ibanEl    = document.getElementById('ibanDisplay');
+  const ownerTag  = document.querySelector('.iban-meta .tag-owner');
+  const bankCodeEl= document.querySelector('.iban-bank-code');
+  const qrCanvas  = document.getElementById('ibanQrCanvas');
+
+  // --- 1) Copy IBAN ---
+  if (copyBtn && ibanEl) {
+    copyBtn.addEventListener('click', () => {
+      const text = ibanEl.textContent.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
+      }).catch(() => {
+        alert('Unable to copy, please copy manually.');
+      });
+    });
+  }
+
+  // --- 2) Real QR containing all 4 formats ---
+  if (qrCanvas && ibanEl && window.QRious) {
+    const ibanPretty = ibanEl.textContent.trim();           // 1) IBAN منسّق
+    const ibanRaw    = ibanPretty.replace(/\s+/g, '');      // 1) IBAN خام بدون مسافات
+
+    const ownerName  = ownerTag
+      ? ownerTag.textContent.replace(/^Owner:\s*/i, '').trim()
+      : 'MiniBank User';
+
+    const bic        = bankCodeEl
+      ? bankCodeEl.textContent.trim()
+      : 'QNBAQAQA';                                         // تقديراً الآن
+
+    const currency   = 'QAR';
+
+    // 3) EPC / SEPA style text
+    // BCD\n002\n1\nSCT\n<BIC>\n<NAME>\n<IBAN>\n<CUR>\n<AMOUNT>\n<NOTE>
+    const epcLines = [
+      'BCD',
+      '002',
+      '1',
+      'SCT',
+      bic,
+      ownerName,
+      ibanRaw,
+      currency,
+      '0',                   // amount 0 = يحددها المستخدم عند الدفع
+      'MiniBank QR'
+    ];
+    const epcString = epcLines.join('\n');
+
+    // 4) JSON شامل يحتوي كل شيء
+    // 4) Text payload منسق يحتوي كل شيء (1–4) بشكل مقروء
+    const lines = [
+      'MiniBank – IBAN Payment QR',
+      '--------------------------',
+      `Name: ${ownerName}`,
+      `IBAN: ${ibanPretty}`,
+      `IBAN (raw): ${ibanRaw}`,
+      `Bank (BIC): ${bic}`,
+      `Currency: ${currency}`,
+      '',
+      'EPC payload:',
+      epcString
+    ];
+
+    const value = lines.join('\n');
+
+    new QRious({
+      element: qrCanvas,
+      value,
+      size: 160,
+      level: 'M'
+    });
+  }
+})();
+</script>
+
+<script>  
+  // Copy IBAN
+  const copyBtn = document.getElementById('copyIbanBtn');
+  const ibanDisplay = document.getElementById('ibanDisplay');
+
+  if (copyBtn && ibanDisplay) {
+    copyBtn.onclick = () => {
+      const text = ibanDisplay.textContent.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
+      }).catch(() => {
+        // fallback بسيط
+        alert('Unable to copy, please copy manually.');
+      });
+    };
+  }
+
+  // Real QR code for IBAN using QRious
+  const qrCanvas = document.getElementById('ibanQrCanvas');
+  if (qrCanvas && ibanDisplay && window.QRious) {
+<section class="card-soft iban-card">
+
+  <div class="iban-header-row">
+    <h3>IBAN</h3>
+    <button id="copyIbanBtn" class="btn-iban-copy">Copy</button>
+  </div>
+
+  <div id="ibanDisplay" class="iban-number">
+    QA84 0000 0000 0000 672f
+  </div>
+
+  <div class="iban-bank-code">QNBAQAQA</div>
+
+  <div class="iban-meta">
+    <span class="tag tag-owner">Owner: karam ramadan boss</span>
+    <span class="tag tag-bank">Demo – Not connected to real bank</span>
+  </div>
+
+  <div class="iban-qr-box">
+    <canvas id="ibanQrCanvas"></canvas>
+  </div>
+
+</section>
+  }
+</script>
+
+  
 </body>
 </html>
