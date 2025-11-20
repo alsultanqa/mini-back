@@ -832,6 +832,165 @@ const categoriesDisplay = Object.entries(byCatBase)
         </div>
       `;
     }
+    // ================= Family Behavior MODE =================
+    if (mode === 'family') {
+      const fam = Array.isArray(state.family) ? state.family : [];
+      const txsAll = Array.isArray(state.tx) ? state.tx : [];
+      const baseCur = state.baseCurrency || 'QAR';
+
+      if (!fam.length) {
+        container.innerHTML = `
+          <div class="insight-card">
+            <div class="muted">Family Behavior</div>
+            <div style="margin-top:6px;">
+              لا يوجد أفراد عائلة بعد. أضف أفرادًا من تبويب <b>Family</b> ثم عد إلى هنا.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const rows = fam.map(m => {
+        const memberTxs = txsAll
+          .filter(t => t.actor === m.id)
+          .sort((a, b) => b.ts - a.ts);
+
+        const spend30 = memberTxs
+          .filter(t => t.type === 'pay' || t.type === 'withdraw')
+          .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+        const income30 = memberTxs
+          .filter(t => t.type === 'deposit' || t.type === 'incoming')
+          .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+        const net = income30 - spend30;
+        const lastTx = memberTxs[0];
+        const lastWhen = lastTx
+          ? new Date(lastTx.ts).toLocaleDateString()
+          : '—';
+
+        const isFrozen = !!m.frozen;
+        const name =
+          (m.name && (m.name.first || m.name.nick)) ||
+          m.label ||
+          ('Member ' + String(m.id).slice(-4));
+
+        return `
+          <tr>
+            <td>${name}</td>
+            <td>
+              ${isFrozen
+                ? '<span class="badge err">Frozen</span>'
+                : '<span class="badge ok">Active</span>'}
+            </td>
+            <td style="text-align:right;">
+              ${spend30 ? fmt(spend30) + ' ' + baseCur : '—'}
+            </td>
+            <td style="text-align:right;">
+              ${net ? fmt(net) + ' ' + baseCur : '—'}
+            </td>
+            <td>${lastWhen}</td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="insight-card" style="grid-column:1/-1;">
+          <div class="muted">Family Behavior – Snapshot</div>
+          <div class="muted" style="margin-top:4px;font-size:11px;">
+            تلخيص سريع لسلوك أفراد العائلة بناءً على عملياتهم في هذا الديمو.
+          </div>
+          <div style="margin-top:8px;overflow:auto;">
+            <table class="mono" style="width:100%;font-size:12px;border-collapse:collapse;">
+              <thead>
+                <tr>
+                  <th align="left">Member</th>
+                  <th align="left">Status</th>
+                  <th align="right">Spend (30d)</th>
+                  <th align="right">Net (30d)</th>
+                  <th align="left">Last activity</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // ================= Timeline MODE =================
+    if (mode === 'history') {
+      let txs = Array.isArray(state.tx) ? state.tx.slice() : [];
+      const actor = state.activeActor || { type: 'owner', memberId: null };
+      const isMemberActor = actor.type === 'member' && actor.memberId;
+
+      if (isMemberActor) {
+        txs = txs.filter(t => t.actor === actor.memberId);
+      }
+
+      if (!txs.length) {
+        container.innerHTML = `
+          <div class="insight-card">
+            <div class="muted">Timeline</div>
+            <div style="margin-top:6px;">
+              لا توجد حركات كافية لعرض التايم لاين بعد. قم ببعض العمليات ثم عد إلى هنا.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      txs = txs
+        .slice(0, 30)
+        .sort((a, b) => b.ts - a.ts);
+
+      const items = txs.map(t => {
+        const d = new Date(t.ts);
+        const when = d.toLocaleString(undefined, {
+          year: '2-digit',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        const cur = t.currency || label;
+        const cat = t.category ? prettyCategory(t.category) : 'Uncategorized';
+        const sign = (t.type === 'deposit' || t.type === 'incoming') ? '+' : '-';
+
+        return `
+          <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">
+            <div style="width:6px;height:6px;border-radius:999px;background:#22c55e;margin-top:6px;"></div>
+            <div>
+              <div style="display:flex;justify-content:space-between;gap:8px;">
+                <span>${t.type.toUpperCase()} ${sign}${fmt(t.amount)} ${cur}</span>
+                <span class="muted" style="font-size:11px;">${when}</span>
+              </div>
+              <div class="muted" style="font-size:12px;margin-top:2px;">
+                ${cat}${t.note ? ' • ' + t.note : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="insight-card" style="grid-column:1/-1;">
+          <div class="muted">Timeline – آخر ${txs.length} حركة</div>
+          <div style="margin-top:8px;">
+            ${items}
+          </div>
+          <div class="muted" style="font-size:11px;margin-top:4px;">
+            كل القيم تقريبية للتجربة وليست بيانات حقيقية.
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+
         // ================= Rush vs Rich Score MODE =================
     if (mode === 'score') {
       const reasonsArr = Array.isArray(scoreReasons)
