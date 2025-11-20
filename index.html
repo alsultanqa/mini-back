@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mini Bank – Family Wallet Demo</title>
+  <style>
+    :root{
+      --bg:#020617;
+      --panel:#02081e;
+      --panel-soft:#02081e;
+      --border:rgba(148,163,184,.35);
+      --accent:#22c1ee;
+      --accent-soft:rgba(34,193,238,.18);
+      --ink:#e5f0ff;
+      --ink-soft:#cbd5f5;
+      --danger:#fb7185;
+      --ok:#22c55e;
+    }
+
+    /* Light theme overrides */
+    :root[data-theme="light"]{
+      --bg:#e5edf7;
+      --panel:#ffffff;
+      --panel-soft:#f9fafb;
+      --border:rgba(148,163,184,.35);
+      --ink:#020617;
+      --ink-soft:#64748b;
+    }
+    :root[data-theme="light"] body.owner-mode{
+      background:radial-gradient(1400px 800px at 10% -10%,#e0f2fe 0,#e5edf7 55%);
+      color:var(--ink);
+    }
+    :root[data-theme="light"] body.member-mode{
+      background:radial-gradient(1400px 800px at 10% -10%,#f5d0fe 0,#e5edf7 55%);
+      color:var(--ink);
+    }
+    :root[data-theme="light"] header{
+      background:rgba(241,245,249,.96);
+      border-bottom:1px solid rgba(148,163,184,.4);
+    }
+    :root[data-theme="light"] .ticker-row span{
+      background:rgba(226,232,240,.98);
+    }
+    :root[data-theme="light"] .card{
+      background:radial-gradient(120% 220% at 0 0,#e5edf7,#ffffff);
+      box-shadow:0 18px 40px rgba(15,23,42,.08);
+    }
+    :root[data-theme="light"] .card-soft{
+      background:linear-gradient(145deg,#f9fafb,#ffffff);
+      box-shadow:0 16px 30px rgba(15,23,42,.1);
+    }
+    :root[data-theme="light"] .mono{
+      color:#0f172a;
+    }
+
+    body.owner-mode{
+      background:radial-gradient(1400px 800px at 10% -10%,#1d2a5a 0,#020617 55%);
+      color:var(--ink);
+    }
+    body.member-mode{
+      background:radial-gradient(1400px 800px at 10% -10%,#4b1d5a 0,#020617 55%);
+      color:var(--ink);
+    }
+
+    *{box-sizing:border-box;}
+
+    /* منع سكروول أفقي وضبط الارتفاع لكل الشاشات */
+    html,body{
+      margin:0;
+      padding:0;
+      height:100%;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--ink);
+      min-height:100vh;
+      background:var(--bg);
+    }
+    a{color:var(--accent);text-decoration:none;}
+    a:hover{text-decoration:underline;}
+
+    .app-shell{
+      max-width:1200px;
+      margin:0 auto;
+      padding:16px 16px 32px;
+    }
+
+    header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(2,6,23,.96);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(148,163,184,.35);
+    }
+    .header-inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:10px 18px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand{
+      font-weight:800;
+      letter-spacing:.08em;
+      font-size:13px;
+      text-transform:uppercase;
+      background:linear-gradient(120deg,#e2e8f0,#38bdf8);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .brand-dot{
+      width:8px;height:8px;border-radius:999px;
+      background:radial-gradient(circle at 30% 30%,#f9fafb,#38bdf8);
+      box-shadow:0 0 10px rgba(56,189,248,.9);
+    }
+    .badge-beta{
+      font-size:10px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(15,23,42,.85);
+      color:var(--ink-soft);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+    :root[data-theme="light"] .badge-beta{
+      background:rgba(226,232,240,.95);
+      color:#0f172a;
+    }
+    .header-spacer{flex:1;}
+    #status{
+      font-size:12px;
+      color:var(--ink-soft);
+      margin-top:4px;
+    }
+
+    .ticker-row{
+      max-width:1200px;
+      margin:0 auto;
+      padding:4px 18px 10px;
+      display:flex;
+      gap:6px;
+      align-items:center;
+      justify-content:space-between;
+      font-size:11px;
+      color:#9ca3af;
+      flex-wrap:wrap;
+    }
+    .ticker-row span{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:rgba(15,23,42,.9);
+    }
+    .ticker-row .dot{
+      width:6px;height:6px;border-radius:999px;background:#22c55e;
+    }
+
+    .card, .card-soft{
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.45);
+      background:radial-gradient(120% 220% at 0 0,rgba(148,163,184,.12) 0,rgba(15,23,42,.96) 40%,rgba(15,23,42,.98) 100%);
+      padding:16px 18px;
+      box-shadow:0 18px 60px rgba(15,23,42,.85);
+      backdrop-filter:blur(22px);
+      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .2s ease;
+    }
+    .card-soft{
+      background:linear-gradient(145deg,rgba(15,23,42,.94),rgba(15,23,42,.99));
+      box-shadow:0 16px 40px rgba(15,23,42,.85);
+    }
+    .card + .card, .card-soft + .card-soft{margin-top:12px;}
+    .card:hover, .card-soft:hover{
+      transform:translateY(-2px);
+      border-color:var(--accent);
+      box-shadow:0 22px 55px rgba(15,23,42,.95);
+    }
+
+    h1,h2,h3{
+      margin:0 0 8px;
+      font-weight:600;
+      letter-spacing:.02em;
+    }
+    h1{font-size:24px;}
+    h2{font-size:19px;}
+    h3{font-size:16px;}
+
+    .muted{
+      color:var(--ink-soft);
+      font-size:12px;
+    }
+    .mono{
+      font-family:ui-monospace,Menlo,Consolas,monospace;
+      font-size:12px;
+      color:#e5e7eb;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .btn-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .btn{
+      border-radius:999px;
+      border:1px solid transparent;
+      padding:7px 14px;
+      font-size:13px;
+      font-weight:500;
+      color:#0b1220;
+      background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      box-shadow:0 10px 30px rgba(56,189,248,.35);
+      transition:transform .12s ease, box-shadow .12s ease, background .12s ease, opacity .12s ease;
+    }
+    .btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 40px rgba(56,189,248,.45);
+    }
+    .btn:active{
+      transform:translateY(0);
+      box-shadow:0 6px 18px rgba(15,23,42,.9);
+    }
+
+    /* ثيم فاتح – تصحيح ألوان الأزرار الثانوية (السوداء) */
+    :root[data-theme="light"] .btn.secondary{
+      background:#020617;
+      color:#f9fafb;
+      border-color:rgba(15,23,42,.85);
+    }
+    :root[data-theme="light"] .btn.secondary:hover{
+      background:#020617;
+      opacity:0.9;
+    }
+
+    .btn.secondary{
+      background:rgba(15,23,42,1);
+      color:var(--ink);
+      border-color:rgba(148,163,184,.6);
+      box-shadow:none;
+    }
+    .btn.secondary:hover{
+      background:rgba(15,23,42,.96);
+      border-color:var(--accent);
+    }
+    .btn.ghost{
+      background:transparent;
+      border-color:rgba(148,163,184,.4);
+      color:var(--ink-soft);
+      box-shadow:none;
+    }
+    .btn.ghost:hover{
+      background:rgba(15,23,42,.92);
+      color:var(--ink);
+    }
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      box-shadow:none;
+      transform:none;
+    }
+
+    .tabs{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      margin-bottom:14px;
+      padding:4px;
+      border-radius:999px;
+      background:rgba(15,23,42,.85);
+      border:1px solid rgba(148,163,184,.4);
+      overflow-x:auto;                 /* مهم للموبايل */
+      -webkit-overflow-scrolling:touch;
+    }
+    :root[data-theme="light"] .tabs{
+      background:rgba(226,232,240,.95);
+      border-color:rgba(148,163,184,.6);
+    }
+    .tab{
+      border-radius:999px;
+      border:none;
+      padding:6px 14px;
+      font-size:12px;
+      text-transform:capitalize;
+      color:var(--ink-soft);
+      background:transparent;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      transition:background .14s ease, color .14s ease, transform .12s ease;
+      white-space:nowrap;              /* منع كسر النص داخل التاب */
+    }
+    .tab::before{
+      font-size:13px;
+      opacity:.9;
+    }
+    .tab[data-tab="dashboard"]::before{content:"🏠";}
+    .tab[data-tab="family"]::before{content:"👨‍👩‍👧";}
+    .tab[data-tab="ai"]::before{content:"🧠";}
+    .tab[data-tab="profile"]::before{content:"⚙️";}
+    .tab.active{
+      background:radial-gradient(circle at 0 0,rgba(148,163,184,.4),rgba(15,23,42,.95));
+      color:var(--ink);
+      transform:translateY(-1px);
+    }
+    :root[data-theme="light"] .tab.active{
+      background:radial-gradient(circle at 0 0,#ffffff,#cbd5f5);
+      color:#0f172a;
+    }
+    .tab:hover:not(.active){
+      background:rgba(15,23,42,.9);
+      color:var(--ink);
+    }
+    :root[data-theme="light"] .tab:hover:not(.active){
+      background:rgba(226,232,240,1);
+      color:#0f172a;
+    }
+
+    .tab-panel{
+      display:none;
+      margin-top:4px;
+    }
+    .tab-panel:not(.hidden){display:block;}
+    .fade-tab{
+      animation:fadeIn .2s ease-out;
+    }
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(4px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+    }
+    @media(max-width:860px){
+      .grid-2,.grid-3{grid-template-columns:minmax(0,1fr);}
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.55);
+      background:rgba(15,23,42,.9);
+      font-size:11px;
+      color:var(--ink-soft);
+      white-space:nowrap;
+    }
+    :root[data-theme="light"] .chip{
+      background:#eef2ff;
+      color:#1f2937;
+      border-color:rgba(148,163,184,.6);
+    }
+
+    .iban-val{
+      font-family:ui-monospace,Menlo,Consolas,monospace;
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px dashed rgba(148,163,184,.45);
+      background:rgba(15,23,42,.9);
+      margin-top:4px;
+      word-break:break-all;
+    }
+    :root[data-theme="light"] .iban-val{
+      background:#f9fafb;
+    }
+
+    .balance-val{
+      font-size:30px;
+      font-weight:700;
+      letter-spacing:.03em;
+      color:#f9fafb;
+    }
+    :root[data-theme="light"] .balance-val{
+      color:#020617;
+    }
+    .balance-pulse{
+      animation:pulse 250ms ease-out;
+    }
+    @keyframes pulse{
+      0%{transform:scale(1);text-shadow:none;}
+      50%{transform:scale(1.03);text-shadow:0 0 18px rgba(56,189,248,.9);}
+      100%{transform:scale(1);text-shadow:none;}
+    }
+
+    .tx-list{
+      margin-top:10px;
+      max-height:min(260px,55vh);  /* يتكيف مع ارتفاع الشاشة */
+      overflow:auto;
+      padding-right:4px;
+    }
+    .tx-item{
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(30,64,175,.5);
+      background:radial-gradient(circle at 0 0,rgba(30,64,175,.7),rgba(15,23,42,.96));
+      margin-bottom:6px;
+      box-shadow:0 8px 28px rgba(15,23,42,.8);
+    }
+    .tx-item:last-child{margin-bottom:0;}
+    .tx-item .tx-head{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+      font-size:13px;
+    }
+    .tx-type{font-weight:600;}
+    .badge{
+      font-size:10px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.5);
+      background:rgba(15,23,42,.9);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    :root[data-theme="light"] .badge{
+      background:#e5e7eb;
+      color:#111827;
+    }
+    .badge.ok{border-color:rgba(34,197,94,.8);color:#bbf7d0;}
+    .badge.pending{border-color:rgba(234,179,8,.85);color:#facc15;}
+    .badge.err{border-color:rgba(248,113,113,.9);color:#fecaca;}
+
+    .field-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:10px 12px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .field label{
+      font-size:12px;
+      color:var(--ink-soft);
+    }
+    .field input,.field select{
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.55);
+      background:rgba(15,23,42,.96);
+      color:var(--ink);
+      font-size:13px;
+      outline:none;
+      transition:border-color .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .field input:focus,.field select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(34,193,238,.55);
+      background:rgba(15,23,42,1);
+    }
+    :root[data-theme="light"] .field input,
+    :root[data-theme="light"] .field select{
+      background:#ffffff;
+      color:#0f172a;
+    }
+    .field small{font-size:11px;color:var(--ink-soft)}
+
+    .welcome-title{
+      font-size:20px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+    .welcome-text{
+      font-size:13px;
+      color:var(--ink-soft);
+      margin-bottom:12px;
+    }
+
+    .msg-bar{
+      margin-top:8px;
+      font-size:12px;
+      color:#e5e7eb;
+      min-height:16px;
+      padding:6px 10px;
+      border-radius:999px;
+      display:inline-block;
+      background:rgba(15,23,42,.12);
+    }
+    :root[data-theme="light"] .msg-bar{
+      color:#111827;
+      background:rgba(148,163,184,.12);
+    }
+
+    .hidden{display:none!important;}
+
+    .fam-card{
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.5);
+      padding:10px 12px;
+      background:rgba(12,18,35,.98);
+      margin-bottom:8px;
+      box-shadow:0 12px 30px rgba(15,23,42,.9);
+    }
+    :root[data-theme="light"] .fam-card{
+      background:#f9fafb;
+      box-shadow:0 10px 26px rgba(15,23,42,.08);
+    }
+    .fam-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .modal{
+      position:fixed;inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:40;
+    }
+    .modal.hidden{display:none;}
+    .modal-backdrop{
+      position:absolute;inset:0;
+      background:rgba(15,23,42,.85);
+      backdrop-filter:blur(18px);
+    }
+    :root[data-theme="light"] .modal-backdrop{
+      background:rgba(15,23,42,.35);
+    }
+    .modal-card{
+      position:relative;
+      width:100%;
+      max-width:420px;
+      max-height:90vh;          /* لا يتجاوز ارتفاع الشاشة */
+      margin:0 12px;            /* هوامش على الموبايل */
+      padding:16px 18px 14px;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.4);
+      background:radial-gradient(120% 220% at 0 0,rgba(148,163,184,.22),rgba(15,23,42,.98));
+      box-shadow:0 18px 60px rgba(15,23,42,.95);
+      animation:modalIn .16s ease-out;
+      overflow-y:auto;          /* سكرول داخل المودال لو المحتوى طويل */
+    }
+    :root[data-theme="light"] .modal-card{
+      background:radial-gradient(120% 220% at 0 0,#e5edf7,#ffffff);
+      box-shadow:0 18px 50px rgba(15,23,42,.25);
+    }
+    @keyframes modalIn{
+      from{opacity:0;transform:translateY(8px) scale(.98);}
+      to{opacity:1;transform:translateY(0) scale(1);}
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:flex-end;
+      margin-top:12px;
+    }
+
+    .score-meter{
+      margin-top:8px;
+      width:100%;
+      height:8px;
+      border-radius:999px;
+      background:rgba(15,23,42,1);
+      overflow:hidden;
+    }
+    :root[data-theme="light"] .score-meter{
+      background:#e5e7eb;
+    }
+    .score-meter-inner{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#ef4444,#f97316,#22c55e,#4ade80);
+      transition:width .25s ease-out;
+    }
+
+    /* ===== Money AI / Insights styling ===== */
+
+    .insights-header-row{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      margin-bottom:10px;
+    }
+    .insights-title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .insights-title h3{margin:0;}
+    .insights-badge{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      font-size:11px;
+      color:var(--ink-soft);
+      flex-wrap:wrap;
+    }
+    .insights-badge span{
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(15,23,42,.9);
+    }
+    :root[data-theme="light"] .insights-badge span{
+      background:#eef2ff;
+      color:#111827;
+    }
+
+    .insights-controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:flex-end;
+    }
+
+    .insight-card{
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.45);
+      background:radial-gradient(120% 220% at 0 0,rgba(30,64,175,.28),rgba(15,23,42,.98));
+      padding:10px 12px;
+      box-shadow:0 14px 36px rgba(15,23,42,.9);
+      min-height:64px;
+    }
+    :root[data-theme="light"] .insight-card{
+      background:radial-gradient(120% 220% at 0 0,#e5edf7,#ffffff);
+      box-shadow:0 12px 30px rgba(15,23,42,.18);
+    }
+    .insight-card .muted{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .insight-main{
+      font-size:20px;
+      font-weight:700;
+      margin-top:4px;
+    }
+
+    .goal-item{
+      font-size:12px;
+      padding:6px 0;
+    }
+
+    .rush-chip{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:11px;
+      min-width:170px;
+    }
+
+    /* ===== Responsive tweaks للهيدر والكروت ===== */
+
+    @media (max-width:768px){
+      .header-inner{
+        flex-wrap:wrap;
+        align-items:flex-start;
+        gap:8px;
+      }
+      .badge-beta{
+        font-size:9px;
+        padding:3px 6px;
+      }
+      .ticker-row{
+        padding-inline:12px;
+        font-size:10px;
+      }
+      .header-inner .btn{
+        padding-inline:10px;
+        font-size:12px;
+      }
+    }
+
+    @media (max-width:480px){
+      .header-inner{
+        padding-inline:10px;
+      }
+      .brand span:nth-child(2){
+        font-size:11px;
+      }
+      .badge-beta{
+        display:none; /* تقليل الزحمة في أعلى الموبايل */
+      }
+    }
+
+    @media (max-width:600px){
+      .card, .card-soft{
+        padding:12px 12px;
+        border-radius:14px;
+      }
+      h1{font-size:20px;}
+      h2{font-size:17px;}
+      h3{font-size:15px;}
+    }
+
+    @media (max-width:480px){
+      .modal-card{
+        padding:14px 14px 12px;
+        border-radius:14px;
+      }
+    }
+
+    /* === Fix Rich Goals row responsive === */
+#goalForm{
+  /* نحافظ على شكل الديسكتوب كما هو */
+  grid-template-columns:2fr 1fr 1fr auto !important;
+}
+
+/* شاشات متوسطة: نخليها عمودين بدل ما تطلع برا الكرت */
+@media (max-width:900px){
+  #goalForm{
+    grid-template-columns:1.5fr 1fr auto !important;
+  }
+}
+
+/* تابلت / موبايل عرضي: عمودين متساويين */
+@media (max-width:700px){
+  #goalForm{
+    grid-template-columns:1fr 1fr !important;
+  }
+}
+
+/* موبايل صغير: كل خانة في سطر لوحده */
+@media (max-width:480px){
+  #goalForm{
+    grid-template-columns:1fr !important;
+  }
+}
+
+
+  </style>
+
+  <style>
+/* === Serial Explorer Modal Fix === */
+
+#serialExplorerModal {
+  position: fixed !important;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999 !important;
+}
+
+#serialExplorerModal.hidden {
+  display: none !important;
+}
+
+#serialExplorerModal .modal-content {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 14px;
+  padding: 20px;
+  width: 90%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0px 0px 30px rgba(0,0,0,0.4);
+  animation: scaleIn .2s ease-out;
+}
+
+/* Light theme tweaks for Serial Twin modal */
+:root[data-theme="light"] #serialExplorerModal {
+  /* خلفية أهدى في المود الفاتح */
+  background: rgba(148,163,184,0.35);
+}
+
+:root[data-theme="light"] #serialExplorerModal .modal-content {
+  background: var(--panel);              /* أبيض مثل باقي البانلز */
+  border-color: var(--border);
+  color: var(--ink);                     /* خط غامق واضح */
+}
+
+/* داخل المودال خلي النص الخافت أنعم شوي في المود الفاتح */
+:root[data-theme="light"] #serialExplorerModal .modal-content .muted {
+  color: var(--ink-soft);
+}
+
+/* Fix dark inner blocks inside modal when in light mode */
+:root[data-theme="light"] #serialExplorerModal .modal-content .mono,
+:root[data-theme="light"] #serialExplorerModal .modal-content .mono * {
+  color: #0f172a !important;   /* نص غامق وواضح */
+}
+
+/* الصناديق الغامقة تصير أخف في المود الفاتح */
+:root[data-theme="light"] #serialExplorerModal .modal-content div[style*="background:#020617"] {
+  background: #e2e8f0 !important;   /* لون رمادي فاتح */
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+</style>
+
+</head>
+<body class="owner-mode">
+<header class="mb-header">
+  <style>
+    /* ===== MiniBank Premium Header v10 ===== */
+    .mb-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(16px);
+      background: radial-gradient(circle at top left, rgba(56,189,248,.08), transparent 55%)
+                  , radial-gradient(circle at top right, rgba(34,197,94,.08), transparent 55%)
+                  , rgba(15,23,42,.96);
+      border-bottom: 1px solid rgba(148,163,184,.35);
+    }
+    .mb-header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mb-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .mb-logo-wrap {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+    }
+    .mb-logo-glow {
+      position: absolute;
+      inset: 4px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(56,189,248,.9), transparent 55%),
+        radial-gradient(circle at 80% 100%, rgba(34,197,94,.9), transparent 55%);
+      filter: blur(10px);
+      opacity: 0.75;
+      animation: mbGlow 4.2s ease-in-out infinite;
+    }
+    .mb-logo-circle {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0%, #0ea5e9, #0369a1);
+      border: 1px solid rgba(148,163,184,.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 1px rgba(15,23,42,0.7),
+        0 10px 25px rgba(15,23,42,0.9);
+      overflow: hidden;
+    }
+    .mb-logo-img {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 5px rgba(15,23,42,.8));
+    }
+    .mb-ai-dot {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: #4ade80;
+      box-shadow:
+        0 0 0 2px rgba(15,23,42,1),
+        0 0 16px rgba(34,197,94,.9);
+      animation: mbPulse 1.6s ease-in-out infinite;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #e5e7eb;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      color: #9ca3af;
+      white-space: nowrap;
+    }
+
+    .badge-beta {
+      margin-left: 8px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,.65);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #e5e7eb;
+      background: linear-gradient(90deg, rgba(15,23,42,.9), rgba(30,64,175,.9));
+      box-shadow: 0 0 20px rgba(15,23,42,.9);
+      flex-shrink: 0;
+    }
+
+    .mb-header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+    }
+
+    .mb-header-right .btn {
+      white-space: nowrap;
+    }
+
+    .mb-header-divider {
+      width: 1px;
+      height: 24px;
+      background: radial-gradient(circle, rgba(148,163,184,.8), transparent 60%);
+      opacity: .6;
+      margin: 0 4px;
+      flex-shrink: 0;
+    }
+
+    /* تكيّف مع الشاشات الصغيرة */
+    @media (max-width: 768px) {
+      .mb-header-inner {
+        padding: 8px 10px;
+      }
+      .brand-title {
+        font-size: 16px;
+      }
+      .brand-subtitle {
+        font-size: 10px;
+      }
+      .badge-beta {
+        display: none;
+      }
+      .mb-header-right {
+        justify-content: flex-start;
+      }
+    }
+
+    @keyframes mbGlow {
+      0%, 100% { opacity: 0.65; transform: scale(0.98); }
+      50%      { opacity: 1;    transform: scale(1.05); }
+    }
+    @keyframes mbPulse {
+      0%, 100% { transform: scale(0.9); opacity: 0.6; }
+      50%      { transform: scale(1.15); opacity: 1; }
+    }
+
+    /* نضمن أن سطر التيكر يبقى أنيق */
+    .ticker-row {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 6px 16px 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .ticker-row .dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34,197,94,0.9);
+      margin-right: 4px;
+    }
+    @media (max-width: 640px) {
+      .ticker-row {
+        flex-direction: column;
+        padding: 6px 10px 10px;
+      }
+    }
+  </style>
+
+  <div class="mb-header-inner">
+    <!-- يسار: اللوجو + عنوان البراند -->
+    <div class="mb-header-left">
+      <div class="mb-logo-wrap">
+        <div class="mb-logo-glow"></div>
+        <div class="mb-logo-circle">
+          <!-- غيّر مسار الصورة لو اسم الملف مختلف عندك -->
+          <img src="assets/minibank-flat.svg"
+               alt="MiniBank Logo"
+               class="mb-logo-img">
+          <span class="mb-ai-dot"></span>
+        </div>
+      </div>
+
+      <div class="brand">
+        <span class="brand-title">MiniBank</span>
+        <span class="brand-subtitle">Money AI · BalanceChain Serial Spine</span>
+      </div>
+
+      <span class="badge-beta">v10 • Local Demo</span>
+    </div>
+
+    <!-- يمين: أدوات الداتا + أزرار الدخول + Money AI Chat -->
+    <div class="mb-header-right">
+      <!-- أزرار إدارة البيانات v10 -->
+      <input type="file" id="importFileInput" accept="application/json" style="display:none"/>
+
+      <button id="btnExportData" class="btn ghost" style="padding:4px 10px;font-size:11px;">
+        📤 Backup
+      </button>
+      <button id="btnImportData" class="btn ghost" style="padding:4px 10px;font-size:11px;">
+        📥 Restore
+      </button>
+      <button id="btnResetData" class="btn ghost" style="padding:4px 10px;font-size:11px;">
+        ♻ Reset
+      </button>
+
+      <span class="mb-header-divider"></span>
+
+      <!-- أزرار الدخول / الخروج / الرجوع للمالك (نفس IDs للكود الحالي) -->
+      <button id="btnBackOwner" class="btn ghost hidden">← Back to owner</button>
+      <button id="btnSignUp" class="btn">Create</button>
+      <button id="btnSignIn" class="btn secondary">Sign In</button>
+      <button id="btnBioIn" class="btn secondary">Biometric</button>
+      <button id="btnLogout" class="btn secondary hidden">Logout</button>
+
+      <!-- زر Money AI Chat -->
+      <button id="btnMoneyAIChat" class="btn pill primary">
+        💬 Money AI
+      </button>
+    </div>
+  </div>
+
+  <div class="ticker-row">
+    <span><span class="dot"></span> <span id="status">Signed out</span></span>
+    <span>Family Wallet · FX · Cashback · Rush → Rich Money AI</span>
+  </div>
+</header>
+
+  <main class="app-shell">
+    <section id="welcomeShell" class="card">
+      <div class="welcome-title">Welcome to Mini Bank</div>
+      <p class="welcome-text">
+        نسخة ديمو محلية لمحفظة عائلية مرتبطة بـ BalanceChain. أنشئ حساب المالك،
+        ثم أضف أفراد العائلة وحدد limits و allowance، وجرّب المدفوعات و AI Insights.
+        جميع البيانات محفوظة محلياً على هذا الجهاز فقط (IndexedDB).
+      </p>
+      <div class="btn-row">
+        <button id="btnSignUpBody" class="btn">Create Owner Account</button>
+        <button id="btnSignInBody" class="btn secondary">Sign In</button>
+      </div>
+    </section>
+
+    <!-- Onboarding (Create) -->
+    <section id="onboardCard" class="card hidden" style="margin-top:14px">
+      <h3>Create Owner Account</h3>
+      <p class="muted" style="font-size:13px;margin-bottom:8px">
+        سيتم إنشاء حساب مالك واحد على هذا الجهاز مع PIN وبصمة (إن توفّر WebAuthn).
+      </p>
+      <form id="onboardForm">
+        <div class="field-grid">
+          <div class="field">
+            <label for="signFirst">First name</label>
+            <input id="signFirst" autocomplete="given-name" required>
+          </div>
+          <div class="field">
+            <label for="signMiddle">Middle (optional)</label>
+            <input id="signMiddle">
+          </div>
+          <div class="field">
+            <label for="signLast">Family name</label>
+            <input id="signLast" autocomplete="family-name" required>
+          </div>
+          <div class="field">
+            <label for="signEmail">Email</label>
+            <input id="signEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label for="signPhone">Qatar phone</label>
+            <input id="signPhone" type="tel" placeholder="+974########" required>
+          </div>
+          <div class="field">
+            <label for="signPin">Local PIN (4 digits)</label>
+            <input id="signPin" type="password" inputmode="numeric" maxlength="4" placeholder="****" required>
+            <small>يستخدم هذا الـ PIN كخطة بديلة عند عدم توفر البصمة.</small>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:14px">
+          <button type="button" id="btnCancelOnboard" class="btn secondary">Cancel</button>
+          <button type="submit" class="btn">Create & Register Biometrics</button>
+        </div>
+      </form>
+      <p id="bioSupportHint" class="muted" style="margin-top:8px;font-size:11px;"></p>
+    </section>
+
+    <!-- Login -->
+    <section id="loginCard" class="card hidden" style="margin-top:14px">
+      <h3>Sign in to Mini Bank</h3>
+      <form id="loginForm">
+        <div class="field-grid">
+          <div class="field">
+            <label>Email</label>
+            <input id="loginEmail" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label>PIN</label>
+            <input id="loginPin" type="password" inputmode="numeric" maxlength="4" required>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" id="btnCancelLogin" class="btn secondary">Cancel</button>
+          <button type="submit" class="btn">Sign in</button>
+        </div>
+      </form>
+      <p class="muted" style="margin-top:6px;font-size:11px;">
+        يمكنك أيضاً استخدام زر <b>Biometric</b> من الشريط العلوي عند تفعيل WebAuthn.
+      </p>
+    </section>
+
+    <!-- App Shell (after auth) -->
+    <section id="appShell" class="card hidden" style="margin-top:14px">
+      <h2>Mini Bank – Family Wallet</h2>
+      <p class="muted" style="margin-bottom:10px">
+        حساب مالك واحد مع محافظ متعددة، أفراد عائلة، limits و freeze، و Money AI Insights.
+      </p>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="dashboard">Dashboard</button>
+        <button class="tab" data-tab="fx">FX / صرف عملات</button>
+        <button class="tab" data-tab="family">Family</button>
+        <button class="tab" data-tab="ai">AI Insights</button>
+        <button class="tab" data-tab="profile">Profile</button>
+      </div>
+
+      <!-- Dashboard -->
+      <section id="tab-dashboard" class="tab-panel fade-tab">
+        <div class="grid-2">
+          <section class="card-soft">
+            <h3>IBAN</h3>
+            <div id="iban" class="iban-val">—</div>
+            <div id="bic" class="muted" style="margin-top:4px;font-size:12px;">—</div>
+            <div class="pill-row" style="margin-top:10px">
+              <span class="chip" id="ownerNameChip">Owner: —</span>
+              <span class="chip">Demo – Not connected to real bank</span>
+            </div>
+          </section>
+
+          <section class="card-soft">
+            <h3>Wallet</h3>
+            <div style="display:flex;align-items:flex-end;gap:8px;">
+              <span id="balance" class="balance-val">0.00</span>
+              <select id="currencySelector" class="chip" style="margin-bottom:4px;">
+                <option value="QAR" selected>QAR</option>
+                <option value="SAR">SAR</option>
+                <option value="AED">AED</option>
+                <option value="KWD">KWD</option>
+                <option value="OMR">OMR</option>
+                <option value="BHD">BHD</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="JPY">JPY</option>
+              </select>
+            </div>
+            <div id="hold" class="muted" style="font-size:13px;margin-top:4px;">On hold: 0.00</div>
+            <div class="btn-row" style="margin-top:10px">
+              <button id="btnDeposit" class="btn" disabled>Deposit</button>
+              <button id="btnWithdraw" class="btn secondary" disabled>Withdraw</button>
+              <button id="btnTransfer" class="btn secondary" disabled>Transfer to Member</button>
+              <button id="btnPay" class="btn secondary" disabled>Pay (QR/NFC)</button>
+            </div>
+            <!-- Rush Alerts – premium bar inside Wallet card (JS fills if needed) -->
+            <div id="rushAlertsBar" class="card-soft hidden" style="margin-top:12px;"></div>
+          </section>
+        </div>
+
+        <section class="card-soft" style="margin-top:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <h3 style="margin:0">Recent Transactions</h3>
+            <span class="chip">Local ledger (MSL mirror)</span>
+          </div>
+          <div id="historyList" class="tx-list" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <!-- FX / Currency Exchange -->
+      <section id="tab-fx" class="tab-panel hidden fade-tab">
+        <section class="card-soft">
+
+          <!-- Header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h3 style="margin:0;">FX – صرف العملات</h3>
+              <p class="muted" style="margin-top:4px;font-size:12px;">
+                تحويل فوري بين الريال والعملات الأخرى باستخدام أسعار الديمو.
+              </p>
+            </div>
+            <div id="fxRateBadge"
+                 style="
+                   padding:6px 12px;
+                   border-radius:12px;
+                   background:rgba(148,163,184,.18);
+                   font-size:12px;
+                   border:1px solid rgba(148,163,184,.35);
+                 ">
+              Live Demo Rate
+            </div>
+          </div>
+
+          <hr style="border:none;border-top:1px solid rgba(148,163,184,.25);margin:14px 0;">
+
+          <!-- Direction -->
+          <div class="field">
+            <label style="font-size:13px;margin-bottom:6px;">Direction / اتجاه التحويل</label>
+            <div
+              style="
+                display:flex;
+                gap:14px;
+                flex-wrap:wrap;
+                background:rgba(148,163,184,.12);
+                padding:10px;
+                border-radius:14px;
+                border:1px solid rgba(148,163,184,.28);
+              "
+            >
+              <label style="font-size:13px;display:flex;gap:6px;align-items:center;">
+                <input type="radio" name="fxDir" value="QAR_TO_FX" checked>
+                <span>من QAR → عملة أخرى</span>
+              </label>
+
+              <label style="font-size:13px;display:flex;gap:6px;align-items:center;">
+                <input type="radio" name="fxDir" value="FX_TO_QAR">
+                <span>من عملة → QAR</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Fields -->
+          <div class="field-grid" style="margin-top:14px;">
+            <div class="field">
+              <label>Amount / المبلغ</label>
+              <input id="fxAmount" type="number" step="0.01" placeholder="مثال: 1000">
+            </div>
+
+            <div class="field">
+              <label>Currency / العملة</label>
+              <select id="fxTargetCcy" style="padding:8px 12px;"></select>
+            </div>
+          </div>
+
+          <!-- Apply to wallets -->
+          <div class="field" style="margin-top:10px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;">
+              <input type="checkbox" id="fxApplyWallets" checked>
+              <span>تطبيق التحويل مباشرة على المحافظ</span>
+            </label>
+            <small class="muted">
+              عند التفعيل يتم الخصم من محفظة QAR أو إضافة القيمة للمحفظة بالعملة الأخرى.
+            </small>
+          </div>
+
+          <!-- Convert -->
+          <div class="btn-row" style="margin-top:14px;">
+            <button id="btnFxConvert" class="btn secondary" style="min-width:120px;">
+              Convert
+            </button>
+          </div>
+
+          <!-- Result -->
+          <div id="fxResult"
+               style="
+                 margin-top:16px;
+                 padding:14px 16px;
+                 background:rgba(148,163,184,.08);
+                 border-radius:14px;
+                 border:1px solid rgba(148,163,184,.25);
+                 font-family:ui-monospace, monospace;
+                 font-size:13px;
+                 opacity:0;
+                 transform:translateY(6px);
+                 transition:.25s ease;
+                 white-space:pre-wrap;
+               "
+          ></div>
+
+        </section>
+      </section>
+
+      <!-- Family -->
+      <section id="tab-family" class="tab-panel hidden">
+        <section id="familyFormCard" class="card-soft">
+          <h3>Family Accounts</h3>
+          <p class="muted" style="margin-bottom:8px;">أضف أفراد عائلتك وحدد وضعهم (Full / Allowance) مع limits لكل عضو.</p>
+          <div class="field-grid">
+            <div class="field">
+              <label>First name</label>
+              <input id="famFirst">
+            </div>
+            <div class="field">
+              <label>Middle (optional)</label>
+              <input id="famMiddle">
+            </div>
+            <div class="field">
+              <label>Family name</label>
+              <input id="famLast">
+            </div>
+            <div class="field">
+              <label>Phone (optional)</label>
+              <input id="famPhone" placeholder="+974########">
+            </div>
+            <div class="field">
+              <label>Mode</label>
+              <select id="famMode">
+                <option value="allowance" selected>Allowance – capped</option>
+                <option value="full">Full – limited only by limits</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Allowance (QAR)</label>
+              <input id="famAllowance" type="number" step="0.01" placeholder="500">
+              <small>يُستخدم فقط في وضع Allowance.</small>
+            </div>
+            <div class="field">
+              <label>Per Tx limit (QAR)</label>
+              <input id="famPerTx" type="number" step="0.01" placeholder="0 = no limit">
+            </div>
+            <div class="field">
+              <label>Daily limit (QAR)</label>
+              <input id="famDaily" type="number" step="0.01" placeholder="0 = no limit">
+            </div>
+            <div class="field">
+              <label>Weekly limit (QAR)</label>
+              <input id="famWeekly" type="number" step="0.01" placeholder="0 = no limit">
+            </div>
+            <div class="field">
+              <label>Monthly limit (QAR)</label>
+              <input id="famMonthly" type="number" step="0.01" placeholder="0 = no limit">
+            </div>
+          </div>
+          <div class="actions">
+            <button id="btnAddMember" class="btn">Add member</button>
+          </div>
+        </section>
+
+        <section class="card-soft" style="margin-top:14px">
+          <h3>Family Overview</h3>
+          <div id="familyList"></div>
+        </section>
+
+        <section id="memberBanner" class="card-soft hidden" style="margin-top:12px">
+          <div class="fam-row">
+            <div id="memberBannerText" class="muted">Spending as member</div>
+            <button id="btnBackOwnerInline" class="btn secondary">← Back to owner</button>
+          </div>
+        </section>
+
+        <section id="memberLimits" class="card-soft hidden" style="margin-top:10px">
+          <h3>Member Limits Snapshot</h3>
+          <div id="memberLimitsBody"></div>
+        </section>
+      </section>
+
+      <!-- AI / Money Insights -->
+      <section id="tab-ai" class="tab-panel hidden">
+        <section class="card-soft">
+          <div class="insights-header-row">
+            <div class="insights-title">
+              <h3>Money AI – Spending Brain</h3>
+              <div class="insights-badge">
+                <span>Rush → Rich mindset engine</span>
+                <span>Per-wallet analysis (owner / member)</span>
+              </div>
+              <p class="muted" style="margin-top:4px;">
+                Money AI يحلل معاملات هذه المحفظة فقط (مالك أو عضو) ليحسب Rush vs Rich Score، الـ runway، فئات الصرف،
+                و Rich Goals مع خطة أسبوعية.
+              </p>
+            </div>
+            <div class="insights-controls">
+              <div class="field" style="min-width:180px;">
+                <label>Global display currency</label>
+                <select id="insightsBaseCurrency">
+                  <option value="QAR">QAR (base)</option>
+                  <option value="USD">USD (approx)</option>
+                  <option value="EUR">EUR (approx)</option>
+                  <option value="GBP">GBP (approx)</option>
+                </select>
+              </div>
+<div class="btn-row" id="insightsModeToggle">
+  <div class="btn-group">
+    <button class="btn secondary active" data-mode="overview">Overview</button>
+    <button class="btn secondary" data-mode="score">Rush Vs Rich Score</button>
+    <button class="btn secondary" data-mode="family">Family Behavior</button>
+    <button class="btn secondary" data-mode="history">Timeline</button>
+    <button class="btn secondary" data-mode="chat">Chat Coach</button>
+  </div>
+</div>
+              </div>
+              <div class="field">
+                <label>Export</label>
+                <button id="btnExportReport" type="button" class="btn secondary" style="white-space:nowrap;">Export Money AI report</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="insightsBody" class="grid-2" style="gap:10px;"></div>
+        </section>
+      </section>
+
+<div id="serialExplorerModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Serial Twin</h3>
+    <div id="serialExplorerBody"></div>
+    <button class="btn" onclick="document.getElementById('serialExplorerModal').classList.add('hidden')">
+      Close
+    </button>
+  </div>
+</div>
+
+<div id="serialExplorerModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-content" style="max-width:480px;">
+    <h3 style="margin-top:0;margin-bottom:10px;">Transaction Serial Twin</h3>
+    <div id="serialExplorerBody"></div>
+  </div>
+</div>
+
+
+      <!-- Profile -->
+      <section id="tab-profile" class="tab-panel hidden">
+        <section class="card-soft">
+          <h3>Profile</h3>
+          <form id="profileForm">
+            <div class="field-grid">
+              <div class="field">
+                <label>First name</label>
+                <input id="profFirst">
+              </div>
+              <div class="field">
+                <label>Middle</label>
+                <input id="profMiddle">
+              </div>
+              <div class="field">
+                <label>Family name</label>
+                <input id="profLast">
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input id="profEmail" type="email">
+              </div>
+              <div class="field">
+                <label>Phone</label>
+                <input id="profPhone" type="tel">
+              </div>
+              <div class="field">
+                <label>PIN (4 digits)</label>
+                <input id="profPin" type="password" maxlength="4">
+              </div>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn">Save profile</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card-soft" style="margin-top:12px">
+          <h3>Biometric Security</h3>
+          <p class="muted" style="margin-bottom:8px;">إدارة بيانات WebAuthn لهذا الحساب على هذا الجهاز فقط.</p>
+          <div class="btn-row">
+            <button id="btnResetBio" class="btn secondary">Reset / Re-register Biometrics</button>
+            <button id="btnClearBio" class="btn secondary">Clear Biometrics for this device</button>
+          </div>
+        </section>
+
+      </section>
+
+      <div class="msg-bar" id="msg"></div>
+    </section>
+  </main>
+
+  <!-- Transaction Modal -->
+  <section id="txModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <h3 id="txModalTitle">Transaction</h3>
+      <p id="txModalSubtitle" class="muted" style="margin-bottom:8px;"></p>
+      <div class="field">
+        <label id="txModalLabel">Amount</label>
+        <input id="txAmount" type="number" step="0.01" min="0" placeholder="0.00">
+      </div>
+      <div id="txCategoryGroup" class="field hidden" style="margin-top:8px;">
+        <label>Spending category</label>
+        <select id="txCategory">
+          <option value="general">General / عام</option>
+          <option value="food">Food & Groceries / طعام</option>
+          <option value="transport">Transport / مواصلات</option>
+          <option value="shopping">Shopping / تسوق</option>
+          <option value="bills">Bills & Utilities / فواتير</option>
+          <option value="education">Education / تعليم</option>
+          <option value="health">Health / صحة</option>
+          <option value="travel">Travel / سفر</option>
+          <option value="entertainment">Entertainment / ترفيه</option>
+          <option value="other">Other / أخرى</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button id="btnTxCancel" type="button" class="btn secondary">Cancel</button>
+        <button id="btnTxConfirm" type="button" class="btn">Confirm</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Family Limits Modal -->
+  <section id="limitsModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <h3>Update member limits</h3>
+      <div class="field-grid">
+        <div class="field">
+          <label>Per Tx limit (QAR)</label>
+          <input id="limitPerTx" type="number" step="0.01">
+        </div>
+        <div class="field">
+          <label>Daily limit (QAR)</label>
+          <input id="limitDaily" type="number" step="0.01">
+        </div>
+        <div class="field">
+          <label>Weekly limit (QAR)</label>
+          <input id="limitWeekly" type="number" step="0.01">
+        </div>
+        <div class="field">
+          <label>Monthly limit (QAR)</label>
+          <input id="limitMonthly" type="number" step="0.01">
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnCancelLimits" type="button" class="btn secondary">Cancel</button>
+        <button id="btnSaveLimits" type="button" class="btn">Save</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Freeze Modal -->
+  <section id="freezeModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <h3>Freeze / Unfreeze Member</h3>
+      <p class="muted" style="margin-bottom:8px;">
+        يمكنك تجميد حساب العضو لفترة محددة أو حتى إشعار آخر، أو فكّ التجميد.
+      </p>
+      <p id="freezeMemberName" class="mono" style="margin-bottom:4px;">Member</p>
+      <p id="freezeCurrentStatus" class="muted" style="margin-bottom:8px;"></p>
+      <div id="freezeDurationGroup">
+        <div class="field">
+          <label>Duration</label>
+          <select id="freezeDuration">
+            <option value="1">1 day</option>
+            <option value="2">2 days</option>
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="permanent">Permanent</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnFreezeCancel" type="button" class="btn secondary">Cancel</button>
+        <button id="btnFreezeSave" type="button" class="btn">Freeze</button>
+        <button id="btnFreezeUnfreeze" type="button" class="btn secondary hidden">Unfreeze now</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Transfer Modal (Owner → Member Allowance) -->
+  <section id="transferModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <h3>Transfer to member allowance</h3>
+      <div class="field-grid">
+        <div class="field">
+          <label>Member</label>
+          <select id="transferMemberSelect"></select>
+        </div>
+        <div class="field">
+          <label>Amount (QAR)</label>
+          <input id="transferAmount" type="number" step="0.01" min="0">
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnTransferCancel" type="button" class="btn secondary">Cancel</button>
+        <button id="btnTransferConfirm" type="button" class="btn">Transfer</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Merchant / QR / NFC shell (unused hidden stub) -->
+  <section id="merchantModalShell" class="card-soft hidden" aria-hidden="true" style="display:none;"></section>
+
+  <!-- Merchant QR/NFC (optional showcase, hidden by default) -->
+  <section class="card-soft" style="margin:14px 16px 0;max-width:1200px;display:none;">
+    <h3>Merchant QR / NFC (Local demo)</h3>
+    <div class="field-grid">
+      <div class="field">
+        <label>Merchant ID</label>
+        <input id="mId" value="M-DOHA-001">
+      </div>
+      <div class="field">
+        <label>Amount (QAR)</label>
+        <input id="mAmount" placeholder="50">
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <input id="mDesc" placeholder="Groceries, Coffee, etc.">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button id="btnGenQR" class="btn">Generate Payment QR (payload)</button>
+      <button id="btnPayQR" class="btn secondary">Simulate Scan & Pay</button>
+      <button id="btnTapNFC" class="btn secondary">Tap to Pay (NFC)</button>
+    </div>
+    <div id="merchantQRPayload" class="mono"></div>
+  </section>
+
+  <script src="./balancechain.sdk.js"></script>
+  <script src="./minibank-core.js"></script>
+  <script src="./minibank-moneyai.js"></script>
+
+  <!-- Theme toggle logic (independent from minibank.js) -->
+  <script>
+    (function(){
+      const btn = document.getElementById('btnTheme');
+      if (!btn) return;
+      const KEY = 'miniBankTheme';
+
+      function apply(mode){
+        const root = document.documentElement;
+        root.setAttribute('data-theme', mode);
+        btn.textContent = mode === 'light' ? '🌙' : '☀️';
+      }
+
+      let mode = null;
+      try {
+        mode = localStorage.getItem(KEY);
+      } catch(e) {}
+
+      if (!mode) {
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        mode = prefersLight ? 'light' : 'dark';
+      }
+      apply(mode);
+
+      btn.addEventListener('click', () => {
+        mode = (mode === 'light') ? 'dark' : 'light';
+        try { localStorage.setItem(KEY, mode); } catch(e) {}
+        apply(mode);
+      });
+    })();
+  </script>
+
+  <script>
+    const fxRes = document.getElementById("fxResult");
+    if (fxRes) {
+      const obs = new MutationObserver(() => {
+        if (fxRes.textContent.trim() !== "") {
+          fxRes.style.opacity = 1;
+          fxRes.style.transform = "translateY(0)";
+        }
+      });
+      obs.observe(fxRes, { childList: true, characterData: true, subtree: true });
+    }
+  </script>
+
+  <!-- Report Language Modal -->
+  <section id="reportLangModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <h3>Report language / لغة التقرير</h3>
+      <div class="field">
+        <label>Choose language</label>
+        <label><input type="radio" name="reportLang" value="en"> English</label>
+      </div>
+      <div class="field">
+        <label><input type="radio" name="reportLang" value="ar"> العربية</label>
+      </div>
+      <div class="field">
+        <label><input type="radio" name="reportLang" value="both" checked> English + العربية</label>
+      </div>
+      <div class="actions" style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn secondary" id="btnReportLangCancel">Cancel</button>
+        <button type="button" class="btn primary" id="btnReportLangOk">Generate</button>
+      </div>
+    </div>
+  </section>
+<script>
+  (function () {
+    const DB_NAME = 'minibank_store';
+    const DB_VERSION = 6;
+    const STORES = ['profile', 'wallet', 'tx', 'family', 'insights_history'];
+
+    function openMiniBankDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          STORES.forEach((store) => {
+            if (!db.objectStoreNames.contains(store)) {
+              db.createObjectStore(store, { keyPath: 'id' });
+            }
+          });
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function getAllFromStore(db, store) {
+      return new Promise((resolve, reject) => {
+        try {
+          const tx = db.transaction(store, 'readonly');
+          const os = tx.objectStore(store);
+          const req = os.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => reject(req.error);
+        } catch (err) {
+          resolve([]); // لو ما في store نرجّع فاضي
+        }
+      });
+    }
+
+    async function exportMiniBankData() {
+      try {
+        const db = await openMiniBankDB();
+        const result = {
+          version: 10,
+          exportedAt: new Date().toISOString(),
+          dbName: DB_NAME,
+          stores: {}
+        };
+
+        for (const store of STORES) {
+          result.stores[store] = await getAllFromStore(db, store);
+        }
+
+        const blob = new Blob([JSON.stringify(result, null, 2)], {
+          type: 'application/json'
+        });
+
+        const fileName = 'minibank-backup-v10-' +
+          new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+
+        alert('✅ تم إنشاء ملف النسخة الاحتياطية لبيانات MiniBank.');
+      } catch (err) {
+        console.error('Export failed', err);
+        alert('❌ حدث خطأ أثناء تصدير البيانات.');
+      }
+    }
+
+    async function importMiniBankDataFromFile(file) {
+      if (!file) return;
+      try {
+        const text = await file.text();
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch (e) {
+          alert('❌ ملف غير صالح – ليس JSON صحيحاً.');
+          return;
+        }
+
+        if (!parsed || typeof parsed !== 'object' || !parsed.stores) {
+          alert('❌ ملف النسخة الاحتياطية لا يحتوي على بنية متوقعة.');
+          return;
+        }
+
+        const db = await openMiniBankDB();
+
+        await new Promise((resolve, reject) => {
+          try {
+            const tx = db.transaction(STORES, 'readwrite');
+            STORES.forEach((store) => {
+              const os = tx.objectStore(store);
+              os.clear();
+              const rows = Array.isArray(parsed.stores[store])
+                ? parsed.stores[store]
+                : [];
+              rows.forEach((row) => {
+                if (row && typeof row === 'object' && row.id != null) {
+                  os.put(row);
+                }
+              });
+            });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+          } catch (err) {
+            reject(err);
+          }
+        });
+
+        alert('✅ تم استيراد بيانات MiniBank بنجاح.\nسيتم إعادة تحميل التطبيق الآن.');
+        window.location.reload();
+      } catch (err) {
+        console.error('Import failed', err);
+        alert('❌ حدث خطأ أثناء استيراد البيانات.');
+      }
+    }
+
+    async function resetMiniBankData() {
+      const ok = confirm(
+        '⚠️ تحذير: سيتم حذف جميع بيانات MiniBank المحلية من هذا المتصفح (الحساب، المحفظة، المعاملات، العائلة، التقارير).\nهل أنت متأكد؟'
+      );
+      if (!ok) return;
+
+      try {
+        const db = await openMiniBankDB();
+
+        await new Promise((resolve, reject) => {
+          try {
+            const tx = db.transaction(STORES, 'readwrite');
+            STORES.forEach((store) => {
+              const os = tx.objectStore(store);
+              os.clear();
+            });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+          } catch (err) {
+            reject(err);
+          }
+        });
+
+        alert('✅ تمت إعادة ضبط MiniBank.\nسيتم إعادة تحميل التطبيق الآن.');
+        window.location.reload();
+      } catch (err) {
+        console.error('Reset failed', err);
+        alert('❌ حدث خطأ أثناء إعادة الضبط.');
+      }
+    }
+
+    function wireButtons() {
+      const btnExport = document.getElementById('btnExportData');
+      const btnImport = document.getElementById('btnImportData');
+      const btnReset  = document.getElementById('btnResetData');
+      const fileInput = document.getElementById('importFileInput');
+      const btnChat   = document.getElementById('btnMoneyAIChat');
+
+      if (btnExport) {
+        btnExport.addEventListener('click', () => exportMiniBankData());
+      }
+      if (btnImport && fileInput) {
+        btnImport.addEventListener('click', () => {
+          fileInput.value = '';
+          fileInput.click();
+        });
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (file) importMiniBankDataFromFile(file);
+        });
+      }
+      if (btnReset) {
+        btnReset.addEventListener('click', () => resetMiniBankData());
+      }
+      if (btnChat) {
+        btnChat.addEventListener('click', () => {
+          window.open('money-ai-chat.html', 'moneyAiChat', 'width=1200,height=800');
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', wireButtons);
+    } else {
+      wireButtons();
+    }
+  })();
+</script>
+
+
+</body>
+</html>
