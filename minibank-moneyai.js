@@ -518,6 +518,73 @@ const categoriesDisplay = Object.entries(byCatBase)
     };
   }
 
+
+  // ===========================
+  // Dashboard KPIs (Wallet strip powered by Money AI snapshot)
+  // ===========================
+  function updateDashboardKpisFromSnapshot() {
+    const row = document.getElementById('walletKpiRow');
+    if (!row) return;
+    if (!state || !state.authed) {
+      row.classList.add('kpi-row--hidden');
+      return;
+    }
+
+    if (typeof getMoneyAISnapshotForReport !== 'function') return;
+    const snap = getMoneyAISnapshotForReport();
+    if (!snap) {
+      row.classList.add('kpi-row--hidden');
+      return;
+    }
+
+    row.classList.remove('kpi-row--hidden');
+
+    const cur =
+      snap.label ||
+      snap.displayCur ||
+      state.globalDisplayCurrency ||
+      state.baseCurrency ||
+      'QAR';
+
+    const fmt = (n) => Number(n || 0).toFixed(2);
+
+    const inEl = document.getElementById('kpiIn30');
+    if (inEl) inEl.textContent = fmt(snap.totalIncome30) + ' ' + cur;
+
+    const outEl = document.getElementById('kpiOut30');
+    if (outEl) outEl.textContent = fmt(snap.totalOut30) + ' ' + cur;
+
+    const netEl = document.getElementById('kpiNet30');
+    if (netEl) {
+      const net = Number(snap.net30 || 0);
+      const sign = net > 0 ? '+' : '';
+      netEl.textContent = sign + fmt(net) + ' ' + cur;
+      netEl.classList.toggle('kpi-positive', net > 0);
+      netEl.classList.toggle('kpi-negative', net < 0);
+    }
+
+    const runwayEl = document.getElementById('kpiRunway');
+    if (runwayEl) {
+      const rw = Number(snap.runwayDays || 0);
+      let label;
+      if (!isFinite(rw) || rw > 365) {
+        label = 'Safe · > 1y';
+      } else if (rw <= 0) {
+        label = '⚠ Under pressure';
+      } else if (rw < 30) {
+        label = 'Tight · ' + Math.round(rw) + ' days';
+      } else if (rw < 90) {
+        label = 'OK · ' + Math.round(rw) + ' days';
+      } else {
+        label = 'Comfort · ' + Math.round(rw) + ' days';
+      }
+      runwayEl.textContent = label;
+    }
+  }
+  window.updateDashboardKpisFromSnapshot = updateDashboardKpisFromSnapshot;
+
+
+
   // ===========================
   // Money AI Coach – خطة أسبوعية
   // ===========================
@@ -1126,60 +1193,63 @@ const categoriesDisplay = Object.entries(byCatBase)
 
 
     // ================= OVERVIEW MODE =================
+    // helper للـ Overview
+    const scoreValue = Math.round(score || 0);
+    const reasonsArr = Array.isArray(scoreReasons) ? scoreReasons.slice(0, 3) : [];
+    const reasonsText = reasonsArr.join(' • ');
+
+    let runwayLabel;
+    if (!isFinite(runwayDays) || runwayDays > 365) {
+      runwayLabel = 'Safe · > 1y';
+    } else if (runwayDays <= 0) {
+      runwayLabel = '⚠ Under pressure';
+    } else if (runwayDays < 30) {
+      runwayLabel = 'Tight · ' + Math.round(runwayDays) + ' days';
+    } else if (runwayDays < 90) {
+      runwayLabel = 'OK · ' + Math.round(runwayDays) + ' days';
+    } else {
+      runwayLabel = 'Comfort · ' + Math.round(runwayDays) + ' days';
+    }
+
+    // ================= OVERVIEW MODE =================
     container.innerHTML = `
-      <div class="insight-card">
-        <div class="muted">${balanceTitle}</div>
-        <div class="insight-main">${fmt(currentBalance)} ${label}</div>
-        <div class="muted" style="font-size:12px;margin-top:4px;">
-          ${balanceDesc}
+      <div class="insights-grid">
+        <!-- Rush → Rich Score -->
+        <div class="insight-card premium">
+          <div class="head">Rush → Rich Score</div>
+          <div class="big-score">${scoreValue}%</div>
+          <div class="desc">${scoreLabel || ''}</div>
+          <div class="mini">${reasonsText}</div>
         </div>
+
+        <!-- Runway -->
+        <div class="insight-card">
+          <div class="head">Runway</div>
+          <div class="metric">${runwayLabel}</div>
+          <div class="mini">قراءة تقريبية لقدرة هذه المحفظة على تحمل الصدمات.</div>
+        </div>
+
+        <!-- Balance -->
+        <div class="insight-card">
+          <div class="head">${balanceTitle}</div>
+          <div class="metric">${fmt(currentBalance)} ${label}</div>
+          <div class="mini">${balanceDesc}</div>
+        </div>
+
+        <!-- Cashflow -->
+        <div class="insight-card">
+          <div class="head">${isMember ? 'Spend (last 30 days)' : 'Global spend (last 30 days)'}</div>
+          <div class="metric">${fmt(total30)} ${label}</div>
+          <div class="mini">
+            آخر 7 أيام: ${fmt(total7)} ${label} • All time: ${fmt(totalAll)} ${label} في ${countAll} عملية
+          </div>
+        </div>
+
+        ${exposureBlock || ''}
+        ${catBlock || ''}
+        ${goalsBlock || ''}
+        ${coachBlock || ''}
       </div>
-      <div class="insight-card">
-        <div class="muted">${isMember ? 'Spend (last 30 days)' : 'Global spend (last 30 days)'}</div>
-        <div class="insight-main">${fmt(total30)} ${label}</div>
-        <div class="muted">Last 7 days: <b>${fmt(total7)} ${label}</b></div>
-        <div class="muted">All time: <b>${fmt(totalAll)} ${label}</b> in <b>${countAll}</b> txs</div>
-      </div>
-      <div class="insight-card">
-        <div class="muted">Average ticket (${isMember ? 'this wallet' : 'global'})</div>
-        <div class="insight-main">${fmt(avgTicket)} ${label}</div>
-        <div class="muted">Cashback simulation (${(cashbackRate * 100).toFixed(1)}% on eligible spend):<br>
-          <b>${fmt(cashback30)} ${label}</b> over last 30 days.</div>
-      </div>
-      <div class="insight-card">
-        <div class="muted">${isMember ? 'Cashflow لهذه المحفظة (آخر 30 يوم)' : 'Global Cashflow – آخر 30 يوم (كل المحافظ)'}</div>
-        <div style="margin-top:4px;">
-          <div>Income (إيداعات): <b>${fmt(totalIncome30)} ${label}</b></div>
-          <div>Outflow (سحب/مشتريات/تحويلات): <b>${fmt(totalOut30)} ${label}</b></div>
-          <div>Net Flow: <b style="color:${net30 >= 0 ? '#22c55e' : '#fb7185'}">${fmt(net30)} ${label}</b></div>
-        </div>
-        <div class="muted" style="margin-top:6px;">
-          متوسط الصرف اليومي: <b>${fmt(dailySpend)} ${label}</b>
-        </div>
-        <div class="muted" style="margin-top:4px;">
-          Runway التقريبي لهذه المحفظة:
-          <b>${runwayDays ? fmtInt(runwayDays) : '—'} يوم</b>
-        </div>
-      </div>
-      ${catBlock}
-      ${exposureBlock}
-      <div class="insight-card">
-        <div class="muted">Money AI – تعليق ذكي</div>
-        <div style="margin-top:4px;">
-          ${
-            net30 < 0
-              ? 'صافي التدفق المالي في هذه المحفظة سلبي. جرّب تقليل الكماليات وربط الصرف بالهدف الواضح فقط.'
-              : (net30 > 0
-                ? 'أداء جيد، هذه المحفظة تحقق صافي إيجابي. استغل الفائض لبناء احتياطي صغير.'
-                : 'البيانات متوازنة تقريباً بدون فرق واضح بين الدخل والمصاريف. أي تحسن بسيط سيظهر مباشرة في الـ runway.')
-          }
-        </div>
-        <div class="muted" style="margin-top:6px;font-size:11px;">
-          التحليل مبني على معاملات هذه المحفظة داخل هذا الديمو فقط.
-        </div>
-      </div>
-      ${goalsBlock}
-      ${coachBlock}
     `;
     wireGoalsInteractions();
   }
