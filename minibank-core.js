@@ -1114,10 +1114,19 @@ async function ownerPay(amt, category) {
       curSel.disabled = isMember;
     }
 
-    const holdEl = $('#hold');
-    if (holdEl) holdEl.textContent = 'On hold: ' + (activeWallet.hold || 0).toFixed(2) + ' ' + activeCur;
+const holdEl = $('#hold');
+if (holdEl) holdEl.textContent = 'On hold: ' + (activeWallet.hold || 0).toFixed(2) + ' ' + activeCur;
 
-    const backHeader = $('#btnBackOwner');
+// تحديث KPIs بعد تحديث الرصيد
+if (typeof updateDashboardKpisFromSnapshot === 'function') {
+  try {
+    updateDashboardKpisFromSnapshot();
+  } catch (e) {
+    console.error('KPI update error', e);
+  }
+}
+
+const backHeader = $('#btnBackOwner');
     const backInline = $('#btnBackOwnerInline');
     const memberBannerText = $('#memberBannerText');
     const transferBtn = $('#btnTransfer');
@@ -1623,13 +1632,34 @@ function openTxSerialExplorer(tx) {
 
   function hydrateProfileForm() {
     if (!state.user) return;
-    const u = state.user; const n = u.name || {};
-    const f = $('#profFirst'); if (f) f.value = n.first || '';
-    const m = $('#profMiddle'); if (m) m.value = n.middle || '';
-    const l = $('#profLast'); if (l) l.value = n.last || '';
-    const e = $('#profEmail'); if (e) e.value = u.email || '';
-    const p = $('#profPhone'); if (p) p.value = u.phone || '';
-    const pin = $('#profPin'); if (pin) pin.value = u.pin || '';
+    const u = state.user; 
+    const n = u.name || {};
+
+    const f = $('#profFirst');  if (f)  f.value  = n.first  || '';
+    const m = $('#profMiddle'); if (m)  m.value  = n.middle || '';
+    const l = $('#profLast');   if (l)  l.value  = n.last   || '';
+    const e = $('#profEmail');  if (e)  e.value  = u.email  || '';
+    const p = $('#profPhone');  if (p)  p.value  = u.phone  || '';
+    const pin = $('#profPin');  if (pin) pin.value = u.pin  || '';
+
+    // عناصر العرض الجديدة في كرت البروفايل
+    const displayName = [n.first, n.middle, n.last].filter(Boolean).join(' ') || '—';
+    const nameEl   = $('#profDisplayName');   if (nameEl)   nameEl.textContent   = displayName;
+    const emailEl  = $('#profDisplayEmail');  if (emailEl)  emailEl.textContent  = u.email || '—';
+
+    const avatarEl = $('#profAvatarCircle');
+    if (avatarEl) {
+      const initials =
+        ((n.first && n.first[0]) || '') +
+        ((n.last && n.last[0])  || '');
+      avatarEl.textContent = (initials || 'MB').toUpperCase();
+    }
+
+    const idEl = $('#profUserId'); 
+    if (idEl) idEl.textContent = u.id || '—';
+
+    const prefCurEl = $('#profPrefCurrency');
+    if (prefCurEl) prefCurEl.textContent = state.baseCurrency || 'QAR';
   }
 
   async function submitProfileForm(e) {
